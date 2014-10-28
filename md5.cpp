@@ -150,6 +150,8 @@ void md5::toCapital(char* word, int index)
     strcpy(new_word,word);
     if(islower(new_word[index]))
         new_word[index] -= 32;
+    else
+        new_word[index] += 32;
 
     toCapital(new_word,index-1);
 }
