@@ -22,7 +22,7 @@ int dic_size;
 long long int guess = 0;
 int hit_num = 0;
 char *testFile;
-char num_array[1005];
+char num_array[1005][5];
 
 void md5Algo(const uint8_t*, size_t, uint8_t*);
 
@@ -71,7 +71,7 @@ md5::md5(char *file)
         if(guess > guess_times) break;
         strcpy(word,(dic[i])->word);
         len = strlen(word);
-        if((i%300) == 0)
+        if((i%500) == 0)
             printf("word = %s, guess = %d\n",word,guess);
         toCapital(word,len-1);     // change character to Capital
     }
@@ -145,8 +145,8 @@ void md5::buildNum()
 {
     for(int i = 0; i < num_range; i++)
     {
-        num_array[i] = i+48;
-        printf("%c\n",num_array[i]);
+        sprintf(num_array[i],"%d",i);
+        printf("%s\n",num_array[i]);
     }
 }
 
@@ -182,22 +182,19 @@ void md5::addNum(char* word)
     char code[35] = "";
     char new_word[15], ori_word[15];
     char num_string[15];
-    uint8_t result[16],result1[16];
+    uint8_t result[16];
 
-    cnt = 1000;
-
-    for(i = 0; i < cnt; i++)
+    for(i = 0; i < num_range; i++)
     {
         if(guess > guess_times) break;
 
-        num++;
-
-        sprintf(tmp,"%d",num);    // convert int num to string
-        strcpy(num_string,tmp);
+        //strcpy(num_string,num_array[i]);
 
         /**case1: int + word **/
         memset(code,0,sizeof(code));
-        strcpy(new_word,strcat(tmp,word));
+        //strcpy(new_word,strcat(tmp,word));
+        strcpy(new_word,num_array[i]);
+        strcat(new_word,word));
         word_len = strlen(new_word);
         md5Algo((uint8_t*)new_word, word_len, result);
 
@@ -212,9 +209,11 @@ void md5::addNum(char* word)
 
         /**case2: word + int **/
         memset(code,0,sizeof(code));
-        strcpy(ori_word,word);
-        strcpy(new_word,strcat(ori_word,num_string));
-        word_len = strlen(new_word);
+        //strcpy(ori_word,word);
+        //strcpy(new_word,strcat(ori_word,num_string));
+        strcpy(new_word,word);
+        strcat(new_word,num_array[i]);
+        //word_len = strlen(new_word);
 
         md5Algo((uint8_t*)new_word, word_len, result);
 
