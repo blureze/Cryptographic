@@ -14,7 +14,7 @@ private:
     uint32_t to_int32(const uint8_t*);
     void md5Algo(const uint8_t*, size_t, uint8_t*);
     void buildDic();
-    //void buildList();
+    void buildNum();
     void toCapital(char*, int);
     void addNum(char*);
     void compare(char*, char*);

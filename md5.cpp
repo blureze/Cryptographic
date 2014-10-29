@@ -13,6 +13,7 @@
 #define max_length 8
 #define min_length 3
 #define guess_times 4000000000
+#define num_range 1000  // number range is 0~999
 
 using namespace std;
 
@@ -20,6 +21,8 @@ vector<data*> dic;
 int dic_size;
 long long int guess = 0;
 int hit_num = 0;
+char *testFile;
+char num_array[1005];
 
 void md5Algo(const uint8_t*, size_t, uint8_t*);
 
@@ -53,20 +56,23 @@ const uint32_t r[] = {7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22
 
 // leftrotate function definition
 
-md5::md5()
+md5::md5(char *file)
 {
     //ctor
     char word[15];
     int len;
 
-    buildDic();     // build a dictionary that the word_length < 12
+    strcpy(testFile,file);
+    buildDic();     // build a dictionary that the word_length is between max_length and min_length
+    buildNum();
     //printf("size = %d\n",dic_size);
     for(int i = 0; i < dic_size; i++)
     {
         if(guess > guess_times) break;
         strcpy(word,(dic[i])->word);
         len = strlen(word);
-        printf("word = %s\n",word);
+        if((i%300) == 0)
+            printf("word = %s, guess = %d\n",word,guess);
         toCapital(word,len-1);     // change character to Capital
     }
 }
@@ -105,7 +111,7 @@ void md5::buildDic()
         int len = strlen(word)-1;   // Notice that '\n' is also count in length
         bool store = true;
 
-        if(len > max_length || len < min_length)  continue;    // just keep the words with length between 3 and 8
+        if(len > max_length || len < min_length)  continue;
 
         for(int j = 0; j < len; j++)
         {
@@ -135,8 +141,19 @@ void md5::buildDic()
 
 }
 
+void md5::buildNum()
+{
+    for(int i = 0; i < num_range; i++)
+    {
+        num_array[i] = i+48;
+        printf("%c\n",num_array[i]);
+    }
+}
+
 void md5::toCapital(char* word, int index)
 {
+    if(guess > guess_times) return;
+
     if(index == -1)
     {
         //printf("word = %s\n",word);
@@ -158,15 +175,14 @@ void md5::toCapital(char* word, int index)
 
 void md5::addNum(char* word)
 {
-    int i,cnt = 1, num = -1;
+    int i,cnt, num = -1;
     int word_len;
     char tmp[15];
     char t[5] = "";
+    char code[35] = "";
     char new_word[15], ori_word[15];
     char num_string[15];
-    uint8_t result[16];
-
-    memset(new_word,' ',sizeof(new_word));    // init
+    uint8_t result[16],result1[16];
 
     cnt = 1000;
 
@@ -176,13 +192,13 @@ void md5::addNum(char* word)
 
         num++;
 
-        char code[35] = "";
         sprintf(tmp,"%d",num);    // convert int num to string
         strcpy(num_string,tmp);
+
         /**case1: int + word **/
+        memset(code,0,sizeof(code));
         strcpy(new_word,strcat(tmp,word));
         word_len = strlen(new_word);
-        //printf("1.new_word = %s\n",new_word);
         md5Algo((uint8_t*)new_word, word_len, result);
 
         for(int j = 0; j < 16; j++)
@@ -190,15 +206,16 @@ void md5::addNum(char* word)
             sprintf(t,"%2.2x",result[j]);
             strcat(code,t);
         }
-        //printf("code = %s\n",code);
+
         compare(new_word,code);
 
 
         /**case2: word + int **/
+        memset(code,0,sizeof(code));
         strcpy(ori_word,word);
         strcpy(new_word,strcat(ori_word,num_string));
         word_len = strlen(new_word);
-        //printf("2.new_word = %s\n",new_word);
+
         md5Algo((uint8_t*)new_word, word_len, result);
 
         for(int j = 0; j < 16; j++)
@@ -206,7 +223,7 @@ void md5::addNum(char* word)
             sprintf(t,"%2.2x",result[j]);
             strcat(code,t);
         }
-        //printf("code = %s\n",code);
+
         compare(new_word,code);
     }
 }
@@ -217,6 +234,9 @@ void md5::compare(char* word, char* result)
     char password[35];
     FILE *fp1,*fp2;
 
+    guess++;
+    if(guess > guess_times) return;
+
     if((fp1 = fopen("HashedPassword.txt","r")) == NULL)
     {
         printf("Cannot open HashedPassword.txt\n");
@@ -225,8 +245,8 @@ void md5::compare(char* word, char* result)
 
     while(!feof(fp1))
     {
-        guess++;
-        if(guess > guess_times) break;
+        /*guess++;
+        if(guess > guess_times) break;*/
 
         fgets(password,sizeof(password),fp1);
         password[32] = '\0';
