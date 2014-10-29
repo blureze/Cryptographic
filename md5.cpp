@@ -23,6 +23,7 @@ long long int guess = 0;
 int hit_num = 0;
 char *testFile;
 char num_array[1005][5];
+bool hit = false;
 
 void md5Algo(const uint8_t*, size_t, uint8_t*);
 
@@ -153,6 +154,7 @@ void md5::buildNum()
 void md5::toCapital(char* word, int index)
 {
     if(guess > guess_times) return;
+    if(hit) return;
 
     if(index == -1)
     {
@@ -186,8 +188,6 @@ void md5::addNum(char* word)
 
     for(i = 0; i < num_range; i++)
     {
-        if(guess > guess_times) break;
-
         //strcpy(num_string,num_array[i]);
 
         /**case1: int + word **/
@@ -205,7 +205,8 @@ void md5::addNum(char* word)
         }
 
         compare(new_word,code);
-
+        if(guess > guess_times) break;
+        if(hit) break;
 
         /**case2: word + int **/
         memset(code,0,sizeof(code));
@@ -224,12 +225,14 @@ void md5::addNum(char* word)
         }
 
         compare(new_word,code);
+        if(guess > guess_times) break;
+        if(hit) break;
     }
 }
 
 void md5::compare(char* word, char* result)
 {
-    bool hit = false;
+    //bool hit = false;
     char password[35];
     FILE *fp1,*fp2;
 
@@ -242,6 +245,7 @@ void md5::compare(char* word, char* result)
         return;
     }
 
+    hit = false;
     while(!feof(fp1))
     {
         /*guess++;
@@ -265,7 +269,6 @@ void md5::compare(char* word, char* result)
         fprintf(fp2,"%s\t%s\n",word,result);
         fclose(fp2);
         hit_num++;
-        hit = false;
     }
 
     fclose(fp1);
